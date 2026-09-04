@@ -28,6 +28,9 @@ import {
 export default async function(req) {
   let base44 = null;
   let journalEntryId = null;
+  // When re-analyzing, the prior analysis being superseded. Preserved (not
+  // deleted) and linked to the new analysis for longitudinal plant memory.
+  let priorAnalysisId = null;
 
   try {
     base44 = createClientFromRequest(req);
@@ -51,18 +54,26 @@ export default async function(req) {
         return Response.json({ analysis: existing[0], already_analyzed: true, model_provider: "cached" });
       }
       // Controlled re-analysis: only when the prior result warrants it.
+      // History is preserved — the prior analysis is marked superseded
+      // (not deleted) so the system retains longitudinal plant memory.
       if (existing.length > 0 && forceReanalyze) {
-        if (!canReanalyze(existing[0])) {
-          return Response.json({ analysis: existing[0], already_analyzed: true, model_provider: "cached", reanalysis_blocked: true });
+        // With history preservation there may be multiple analyses tied
+        // to the same journal entry. Re-evaluate eligibility against the
+        // most recent one (sorted by analysis_date descending).
+        const sorted = existing.slice().sort((a, b) =>
+          new Date(b.analysis_date || b.created_date).getTime() -
+          new Date(a.analysis_date || a.created_date).getTime()
+        );
+        const currentAnalysis = sorted[0];
+        if (!canReanalyze(currentAnalysis)) {
+          return Response.json({ analysis: currentAnalysis, already_analyzed: true, model_provider: "cached", reanalysis_blocked: true });
         }
-        // Clean up the prior analysis, its observations, and any pending
-        // Garden Actions that originated from it.
-        await base44.entities.AIAnalysis.delete(existing[0].id);
-        await base44.entities.PlantObservation.deleteMany({ journal_entry_id: journalEntryId });
-        const oldActions = await base44.entities.GardenAction.filter({ originating_ai_analysis_id: existing[0].id, status: "pending" });
-        for (const a of oldActions) {
-          await base44.entities.GardenAction.delete(a.id);
-        }
+        // Preserve the prior analysis. Mark superseded_at now; the
+        // superseded_by_analysis_id link is set after the new record exists.
+        priorAnalysisId = currentAnalysis.id;
+        await base44.entities.AIAnalysis.update(priorAnalysisId, {
+          superseded_at: new Date().toISOString()
+        });
       }
       await base44.entities.JournalEntry.update(journalEntryId, { ai_processing_status: "processing" });
     }
@@ -224,6 +235,14 @@ Return ONLY a JSON object with this exact shape:
     const llmFollowUpDateOriginal = normalized.follow_up_date;
     normalized.follow_up_date = validateFollowUpDate(normalized.follow_up_date);
 
+    // Mark all prior analyses for this plant as non-current. Only the
+    // newest analysis is considered current; prior records are preserved
+    // as historical context for longitudinal plant memory.
+    await base44.entities.AIAnalysis.updateMany(
+      { plant_id: plantId },
+      { $set: { is_current: false } }
+    );
+
     // Part 7: Store the structured AIAnalysis record.
     const analysisRecord = await base44.entities.AIAnalysis.create({
       journal_entry_id: journalEntryId || undefined,
@@ -242,8 +261,16 @@ Return ONLY a JSON object with this exact shape:
       image_quality: normalized.image_quality,
       knowledge_source_ids: knowledgeSourceIds,
       raw_result: { ...normalized, llm_follow_up_date_original: llmFollowUpDateOriginal },
-      model_provider: "base44-llm"
+      model_provider: "base44-llm",
+      is_current: true
     });
+
+    // Link the superseded prior analysis to the new one for the audit trail.
+    if (priorAnalysisId) {
+      await base44.entities.AIAnalysis.update(priorAnalysisId, {
+        superseded_by_analysis_id: analysisRecord.id
+      });
+    }
 
     // Part 2: Store structured PlantObservation records.
     for (const obs of normalized.observations || []) {
@@ -258,7 +285,37 @@ Return ONLY a JSON object with this exact shape:
       });
     }
 
-    // Part 8: Create a useful Garden Action with duplicate prevention.
+    // Part 8: Supersede prior pending actions that are no longer appropriate,
+    // then create a new Garden Action with duplicate prevention. Completed
+    // and skipped actions are preserved untouched.
+    if (priorAnalysisId) {
+      const priorPendingActions = await base44.entities.GardenAction.filter({
+        originating_ai_analysis_id: priorAnalysisId,
+        status: "pending"
+      });
+      const newActionKey = String(normalized.recommended_next_action || "").toLowerCase();
+      const needsNoAction = !normalized.recommended_next_action || newActionKey === "observe";
+      for (const action of priorPendingActions) {
+        if (needsNoAction) {
+          await base44.entities.GardenAction.update(action.id, {
+            status: "superseded",
+            superseded_by_analysis_id: analysisRecord.id,
+            superseded_reason: "Superseded by re-analysis: plant now appears healthy."
+          });
+        } else {
+          const oldTitleKey = String(action.title || "").toLowerCase();
+          const sameAction = oldTitleKey.includes(newActionKey) || newActionKey.includes(oldTitleKey);
+          if (!sameAction) {
+            await base44.entities.GardenAction.update(action.id, {
+              status: "superseded",
+              superseded_by_analysis_id: analysisRecord.id,
+              superseded_reason: `Superseded by re-analysis recommending: ${normalized.recommended_next_action.replace(/_/g, " ")}`
+            });
+          }
+        }
+      }
+    }
+
     if (normalized.recommended_next_action && normalized.recommended_next_action !== "observe") {
       const existingPending = await base44.entities.GardenAction.filter({
         plant_id: plantId,
