@@ -1,0 +1,112 @@
+{
+  "name": "GardenAction",
+  "type": "object",
+  "properties": {
+    "garden_id": {
+      "type": "string",
+      "title": "Garden"
+    },
+    "plant_id": {
+      "type": "string",
+      "title": "Plant"
+    },
+    "garden_area_id": {
+      "type": "string",
+      "title": "Garden Area"
+    },
+    "title": {
+      "type": "string",
+      "title": "Action Title"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "reason": {
+      "type": "string",
+      "title": "Reason"
+    },
+    "priority": {
+      "type": "string",
+      "title": "Priority",
+      "enum": [
+        "urgent",
+        "today",
+        "follow_up",
+        "routine",
+        "upcoming"
+      ],
+      "default": "routine"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Due Date"
+    },
+    "source_type": {
+      "type": "string",
+      "title": "Source Type",
+      "enum": [
+        "ai_analysis",
+        "weather",
+        "weekly_plan",
+        "manual",
+        "follow_up"
+      ],
+      "default": "manual"
+    },
+    "originating_ai_analysis_id": {
+      "type": "string",
+      "title": "Originating AI Analysis"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "pending",
+        "completed",
+        "skipped",
+        "snoozed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Completed Date"
+    },
+    "skipped_date": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Skipped Date"
+    },
+    "snoozed_until": {
+      "type": "string",
+      "format": "date",
+      "title": "Snoozed Until"
+    },
+    "outcome": {
+      "type": "string",
+      "title": "Outcome"
+    }
+  },
+  "required": [
+    "garden_id",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

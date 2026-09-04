@@ -1,0 +1,53 @@
+{
+  "name": "Garden",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Garden Name"
+    },
+    "city": {
+      "type": "string",
+      "title": "City"
+    },
+    "zip": {
+      "type": "string",
+      "title": "ZIP Code"
+    },
+    "region": {
+      "type": "string",
+      "title": "California Region",
+      "description": "e.g. Bay Area, Central Valley, SoCal Coast, Sierra Foothills"
+    },
+    "latitude": {
+      "type": "number",
+      "title": "Latitude"
+    },
+    "longitude": {
+      "type": "number",
+      "title": "Longitude"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "title": "Active"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

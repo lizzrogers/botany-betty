@@ -1,0 +1,97 @@
+{
+  "name": "AIAnalysis",
+  "type": "object",
+  "properties": {
+    "journal_entry_id": {
+      "type": "string",
+      "title": "Journal Entry"
+    },
+    "plant_id": {
+      "type": "string",
+      "title": "Plant"
+    },
+    "analysis_date": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Analysis Date"
+    },
+    "observation_summary": {
+      "type": "string",
+      "title": "Observation Summary"
+    },
+    "change_from_previous": {
+      "type": "string",
+      "title": "Change From Previous"
+    },
+    "confidence_level": {
+      "type": "string",
+      "title": "Confidence Level",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "possible_explanations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Possible Explanations"
+    },
+    "urgency": {
+      "type": "string",
+      "title": "Urgency",
+      "enum": [
+        "urgent",
+        "today",
+        "follow_up",
+        "routine",
+        "upcoming"
+      ],
+      "default": "routine"
+    },
+    "recommended_next_action": {
+      "type": "string",
+      "title": "Recommended Next Action"
+    },
+    "follow_up_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Follow-up Date"
+    },
+    "source_references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Source References"
+    },
+    "raw_result": {
+      "type": "object",
+      "title": "Raw Structured AI Result"
+    },
+    "model_provider": {
+      "type": "string",
+      "title": "Model / Provider"
+    }
+  },
+  "required": [
+    "plant_id"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

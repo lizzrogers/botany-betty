@@ -1,0 +1,76 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "garden_id": {
+      "type": "string",
+      "title": "Garden"
+    },
+    "garden_action_id": {
+      "type": "string",
+      "title": "Garden Action"
+    },
+    "category": {
+      "type": "string",
+      "title": "Notification Category",
+      "enum": [
+        "urgent_weather",
+        "action_reminder",
+        "weekly_plan",
+        "harvest_reminder",
+        "planting_reminder",
+        "general"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "message": {
+      "type": "string",
+      "title": "Message"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Scheduled Date"
+    },
+    "delivered": {
+      "type": "boolean",
+      "default": false,
+      "title": "Delivered"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "title": "Read"
+    },
+    "delivery_type": {
+      "type": "string",
+      "title": "Delivery Type",
+      "enum": [
+        "in_app",
+        "email",
+        "push"
+      ],
+      "default": "in_app"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

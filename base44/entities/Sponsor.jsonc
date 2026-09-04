@@ -1,0 +1,59 @@
+{
+  "name": "Sponsor",
+  "type": "object",
+  "properties": {
+    "organization_name": {
+      "type": "string",
+      "title": "Organization Name"
+    },
+    "logo": {
+      "type": "string",
+      "title": "Logo URL"
+    },
+    "short_attribution": {
+      "type": "string",
+      "title": "Short Attribution",
+      "description": "e.g. Garden guidance supported by [Organization]"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "title": "Active"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Start Date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "title": "End Date"
+    },
+    "branding_settings": {
+      "type": "object",
+      "title": "Branding Settings"
+    }
+  },
+  "required": [
+    "organization_name"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

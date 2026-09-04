@@ -1,0 +1,72 @@
+{
+  "name": "WeatherSnapshot",
+  "type": "object",
+  "properties": {
+    "garden_id": {
+      "type": "string",
+      "title": "Garden"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Timestamp"
+    },
+    "current_temp": {
+      "type": "number",
+      "title": "Current Temperature (F)"
+    },
+    "forecast_high": {
+      "type": "number",
+      "title": "Forecast High (F)"
+    },
+    "forecast_low": {
+      "type": "number",
+      "title": "Forecast Low (F)"
+    },
+    "precipitation": {
+      "type": "number",
+      "title": "Precipitation (in)"
+    },
+    "humidity": {
+      "type": "number",
+      "title": "Humidity (%)"
+    },
+    "wind": {
+      "type": "number",
+      "title": "Wind (mph)"
+    },
+    "alert_type": {
+      "type": "string",
+      "title": "Weather Alert Type",
+      "enum": [
+        "heat",
+        "frost",
+        "wind",
+        "rain",
+        "none"
+      ],
+      "default": "none"
+    },
+    "raw_data": {
+      "type": "object",
+      "title": "Raw Forecast Data"
+    }
+  },
+  "required": [
+    "garden_id"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

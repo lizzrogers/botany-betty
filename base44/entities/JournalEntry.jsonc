@@ -1,0 +1,84 @@
+{
+  "name": "JournalEntry",
+  "type": "object",
+  "properties": {
+    "garden_id": {
+      "type": "string",
+      "title": "Garden"
+    },
+    "plant_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Plants",
+      "description": "References to Plant.id"
+    },
+    "garden_area_id": {
+      "type": "string",
+      "title": "Garden Area"
+    },
+    "entry_type": {
+      "type": "string",
+      "title": "Entry Type",
+      "enum": [
+        "observation",
+        "watered",
+        "harvest",
+        "completed_task",
+        "general",
+        "treatment",
+        "planting"
+      ],
+      "default": "general"
+    },
+    "note": {
+      "type": "string",
+      "title": "Written Note"
+    },
+    "voice_transcript": {
+      "type": "string",
+      "title": "Voice Transcript"
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Media URLs"
+    },
+    "ai_processing_status": {
+      "type": "string",
+      "title": "AI Processing Status",
+      "enum": [
+        "pending",
+        "processing",
+        "complete",
+        "failed",
+        "skipped"
+      ],
+      "default": "pending"
+    },
+    "weather_snapshot_id": {
+      "type": "string",
+      "title": "Weather Snapshot"
+    }
+  },
+  "required": [
+    "garden_id"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

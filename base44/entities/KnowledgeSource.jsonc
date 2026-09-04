@@ -1,0 +1,94 @@
+{
+  "name": "KnowledgeSource",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "organization": {
+      "type": "string",
+      "title": "Organization"
+    },
+    "url": {
+      "type": "string",
+      "title": "URL"
+    },
+    "crop_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Crop Tags"
+    },
+    "issue_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Issue Tags"
+    },
+    "topic_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Topic Tags"
+    },
+    "california_region": {
+      "type": "string",
+      "title": "California Region"
+    },
+    "season": {
+      "type": "string",
+      "title": "Season"
+    },
+    "source_type": {
+      "type": "string",
+      "title": "Source Type",
+      "enum": [
+        "uc_anr",
+        "uc_master_gardener",
+        "usda",
+        "extension",
+        "peer_reviewed",
+        "other"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "title": "Summary / Guidance"
+    },
+    "approved": {
+      "type": "boolean",
+      "default": false,
+      "title": "Approved"
+    },
+    "reviewed_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Reviewed Date"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

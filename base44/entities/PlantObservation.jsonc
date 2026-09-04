@@ -1,0 +1,78 @@
+{
+  "name": "PlantObservation",
+  "type": "object",
+  "properties": {
+    "plant_id": {
+      "type": "string",
+      "title": "Plant"
+    },
+    "journal_entry_id": {
+      "type": "string",
+      "title": "Journal Entry"
+    },
+    "observation_date": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Observation Date"
+    },
+    "observation_category": {
+      "type": "string",
+      "title": "Observation Category",
+      "enum": [
+        "wilting",
+        "yellowing",
+        "spotting",
+        "discoloration",
+        "leaf_damage",
+        "visible_pest",
+        "flowering",
+        "fruiting",
+        "vigor",
+        "growth",
+        "other"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "title": "Severity",
+      "enum": [
+        "none",
+        "mild",
+        "moderate",
+        "severe"
+      ],
+      "default": "none"
+    },
+    "confidence": {
+      "type": "string",
+      "title": "Confidence",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    }
+  },
+  "required": [
+    "plant_id"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

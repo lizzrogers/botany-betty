@@ -1,0 +1,102 @@
+{
+  "name": "Plant",
+  "type": "object",
+  "properties": {
+    "garden_id": {
+      "type": "string",
+      "title": "Garden",
+      "description": "Reference to Garden.id"
+    },
+    "garden_area_id": {
+      "type": "string",
+      "title": "Garden Area",
+      "description": "Reference to GardenArea.id"
+    },
+    "display_name": {
+      "type": "string",
+      "title": "Display Name",
+      "description": "e.g. Tomato #1"
+    },
+    "plant_type": {
+      "type": "string",
+      "title": "Plant Type",
+      "description": "e.g. Tomato, Basil, Pepper"
+    },
+    "variety": {
+      "type": "string",
+      "title": "Variety (optional)"
+    },
+    "planting_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Planting / Transplant Date"
+    },
+    "identification_method": {
+      "type": "string",
+      "title": "Identification Method",
+      "enum": [
+        "ai_photo",
+        "manual",
+        "manual_with_ai_help"
+      ],
+      "default": "manual"
+    },
+    "ai_identification_confidence": {
+      "type": "string",
+      "title": "AI ID Confidence",
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "current_status": {
+      "type": "string",
+      "title": "Current Status",
+      "enum": [
+        "healthy",
+        "watch",
+        "needs_attention",
+        "serious_concern",
+        "harvesting",
+        "finished"
+      ],
+      "default": "healthy"
+    },
+    "primary_photo": {
+      "type": "string",
+      "title": "Primary Photo URL"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "title": "Active"
+    },
+    "finished_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Finished Date"
+    }
+  },
+  "required": [
+    "garden_id",
+    "display_name",
+    "plant_type"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

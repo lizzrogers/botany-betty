@@ -1,0 +1,80 @@
+{
+  "name": "Harvest",
+  "type": "object",
+  "properties": {
+    "garden_id": {
+      "type": "string",
+      "title": "Garden"
+    },
+    "plant_id": {
+      "type": "string",
+      "title": "Plant"
+    },
+    "crop": {
+      "type": "string",
+      "title": "Crop"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "quantity": {
+      "type": "number",
+      "title": "Quantity"
+    },
+    "unit": {
+      "type": "string",
+      "title": "Unit",
+      "enum": [
+        "each",
+        "lbs",
+        "oz",
+        "cups",
+        "bunches",
+        "grams"
+      ],
+      "default": "each"
+    },
+    "weight": {
+      "type": "string",
+      "title": "Weight (optional)"
+    },
+    "quality": {
+      "type": "string",
+      "title": "Quality",
+      "enum": [
+        "excellent",
+        "good",
+        "fair",
+        "poor"
+      ]
+    },
+    "note": {
+      "type": "string",
+      "title": "Note"
+    },
+    "photo": {
+      "type": "string",
+      "title": "Photo URL"
+    }
+  },
+  "required": [
+    "garden_id",
+    "plant_id"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

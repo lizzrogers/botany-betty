@@ -1,0 +1,58 @@
+{
+  "name": "WateringRecord",
+  "type": "object",
+  "properties": {
+    "garden_id": {
+      "type": "string",
+      "title": "Garden"
+    },
+    "garden_area_id": {
+      "type": "string",
+      "title": "Garden Area"
+    },
+    "plant_id": {
+      "type": "string",
+      "title": "Plant"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Timestamp"
+    },
+    "amount": {
+      "type": "string",
+      "title": "Amount (optional)"
+    },
+    "source": {
+      "type": "string",
+      "title": "Source",
+      "enum": [
+        "quick_action",
+        "journal_detection",
+        "manual"
+      ],
+      "default": "quick_action"
+    },
+    "note": {
+      "type": "string",
+      "title": "Note"
+    }
+  },
+  "required": [
+    "garden_id"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

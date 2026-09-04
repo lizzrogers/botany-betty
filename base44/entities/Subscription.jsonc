@@ -1,0 +1,62 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "plan": {
+      "type": "string",
+      "title": "Plan",
+      "enum": [
+        "free",
+        "premium"
+      ],
+      "default": "free"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "active",
+        "trialing",
+        "canceled",
+        "past_due",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "title": "Stripe Customer ID"
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "title": "Stripe Subscription ID"
+    },
+    "renewal_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Renewal Date"
+    },
+    "ai_analyses_used_this_period": {
+      "type": "number",
+      "default": 0,
+      "title": "AI Analyses Used This Period"
+    }
+  },
+  "required": [
+    "plan"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

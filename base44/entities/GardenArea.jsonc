@@ -1,0 +1,74 @@
+{
+  "name": "GardenArea",
+  "type": "object",
+  "properties": {
+    "garden_id": {
+      "type": "string",
+      "title": "Garden",
+      "description": "Reference to Garden.id"
+    },
+    "name": {
+      "type": "string",
+      "title": "Area Name"
+    },
+    "area_type": {
+      "type": "string",
+      "title": "Area Type",
+      "enum": [
+        "raised_bed",
+        "in_ground",
+        "container",
+        "patio",
+        "greenhouse",
+        "other"
+      ],
+      "default": "raised_bed"
+    },
+    "dimensions": {
+      "type": "string",
+      "title": "Dimensions (optional)"
+    },
+    "sun_exposure": {
+      "type": "string",
+      "title": "Sun Exposure",
+      "enum": [
+        "full_sun",
+        "partial_sun",
+        "partial_shade",
+        "shade"
+      ],
+      "description": "Optional"
+    },
+    "watering_method": {
+      "type": "string",
+      "title": "Watering Method (optional)"
+    },
+    "soil_notes": {
+      "type": "string",
+      "title": "Soil Notes (optional)"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "title": "Active"
+    }
+  },
+  "required": [
+    "garden_id",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

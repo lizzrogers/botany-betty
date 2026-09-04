@@ -1,11 +1,26 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { GardenProvider } from '@/lib/garden-context';
+import Layout from '@/components/Layout';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
+import Onboarding from '@/pages/Onboarding';
+import Today from '@/pages/Today';
+import MyGarden from '@/pages/MyGarden';
+import PlantDetail from '@/pages/PlantDetail';
+import AddUpdate from '@/pages/AddUpdate';
+import Journal from '@/pages/Journal';
+import ThisWeek from '@/pages/ThisWeek';
+import Settings from '@/pages/Settings';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -34,7 +49,24 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route element={<GardenProvider><Outlet /></GardenProvider>}>
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route element={<Layout />}>
+            <Route path="/" element={<Today />} />
+            <Route path="/garden" element={<MyGarden />} />
+            <Route path="/plant/:id" element={<PlantDetail />} />
+            <Route path="/add-update" element={<AddUpdate />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/this-week" element={<ThisWeek />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
+        </Route>
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
