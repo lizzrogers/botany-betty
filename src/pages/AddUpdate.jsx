@@ -129,60 +129,23 @@ export default function AddUpdate() {
         }
       }
 
-      // Trigger AI photo analysis asynchronously if a photo was attached to a single plant.
+      // Trigger AI plant update analysis if a photo was attached to a single plant.
+      // The backend function builds the full plant context, stores structured
+      // observations + analysis, and creates safe Garden Actions.
+      // The journal entry is already saved above — AI failure does not lose it.
       if (photos.length > 0 && selectedPlants.length === 1) {
         try {
-          const plant = plants.find((p) => p.id === selectedPlants[0]);
-          const res = await base44.functions.invoke("analyzePhoto", {
-            photo_url: photos[0],
-            plant_context: { plant_type: plant?.plant_type, variety: plant?.variety, current_status: plant?.current_status, planting_date: plant?.planting_date }
+          const res = await base44.functions.invoke("analyzePlantUpdate", {
+            journal_entry_id: entry.id,
+            plant_id: selectedPlants[0],
+            photo_url: photos[0]
           });
-          const analysis = res.data?.analysis;
-          if (analysis) {
-            await base44.entities.AIAnalysis.create({
-              journal_entry_id: entry.id,
-              plant_id: selectedPlants[0],
-              analysis_date: new Date().toISOString(),
-              observation_summary: analysis.observation_summary,
-              change_from_previous: analysis.change_from_previous,
-              confidence_level: analysis.confidence_level,
-              possible_explanations: analysis.possible_explanations,
-              urgency: analysis.urgency,
-              recommended_next_action: analysis.recommended_next_action,
-              follow_up_date: analysis.follow_up_date,
-              source_references: analysis.source_references,
-              raw_result: analysis,
-              model_provider: res.data?.model_provider
-            });
-            // Store structured observations
-            for (const obs of analysis.observations || []) {
-              await base44.entities.PlantObservation.create({
-                plant_id: selectedPlants[0],
-                journal_entry_id: entry.id,
-                observation_date: new Date().toISOString(),
-                observation_category: obs.observation_category,
-                severity: obs.severity,
-                confidence: obs.confidence,
-                description: obs.description
-              });
-            }
-            // Create a follow-up garden action if recommended
-            if (analysis.recommended_next_action && analysis.urgency !== "routine") {
-              await base44.entities.GardenAction.create({
-                garden_id: activeGarden.id,
-                plant_id: selectedPlants[0],
-                title: analysis.recommended_next_action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-                description: analysis.observation_summary,
-                reason: (analysis.possible_explanations || []).join("; "),
-                priority: analysis.urgency,
-                source_type: "ai_analysis",
-                status: "pending"
-              });
-            }
+          if (res.data?.error) {
+            toast({ description: "Botany Betty couldn't analyze this update right now, but your journal entry has been saved." });
           }
-          await base44.entities.JournalEntry.update(entry.id, { ai_processing_status: "complete" });
         } catch (e) {
-          await base44.entities.JournalEntry.update(entry.id, { ai_processing_status: "failed" });
+          // Journal entry is already saved — AI failure does not lose it.
+          toast({ description: "Botany Betty couldn't analyze this update right now, but your journal entry has been saved." });
         }
       }
 

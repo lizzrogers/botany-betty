@@ -24,9 +24,11 @@
         "spotting",
         "discoloration",
         "leaf_damage",
+        "curling",
         "visible_pest",
         "flowering",
         "fruiting",
+        "fruit_damage",
         "vigor",
         "growth",
         "other"

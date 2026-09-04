@@ -68,6 +68,37 @@
       },
       "title": "Source References"
     },
+    "additional_evidence_needed": {
+      "type": "string",
+      "title": "Additional Evidence Needed",
+      "description": "What the gardener should photograph or record next, when confidence is insufficient."
+    },
+    "higher_impact_considered": {
+      "type": "boolean",
+      "default": false,
+      "title": "Higher Impact Considered",
+      "description": "Whether a higher-impact intervention (pesticide, fungicide, etc.) was evaluated."
+    },
+    "image_quality": {
+      "type": "string",
+      "title": "Image Quality",
+      "enum": [
+        "good",
+        "fair",
+        "poor",
+        "unusable",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "knowledge_source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Knowledge Source IDs",
+      "description": "References to approved KnowledgeSource records that support this analysis."
+    },
     "raw_result": {
       "type": "object",
       "title": "Raw Structured AI Result"

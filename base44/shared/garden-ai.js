@@ -18,7 +18,8 @@ export const LOW_RISK_ACTIONS = [
   "adjust_watering_timing",
   "temporary_shade",
   "improve_airflow",
-  "remove_dead_material"
+  "remove_dead_material",
+  "gather_more_evidence"
 ];
 
 // Higher-impact interventions that require sufficient evidence + an approved
@@ -85,6 +86,132 @@ export function normalizePhotoAnalysis(raw) {
     urgency: raw.urgency || "routine",
     follow_up_date: raw.follow_up_date || null,
     source_references: Array.isArray(raw.source_references) ? raw.source_references : [],
-    change_from_previous: raw.change_from_previous || ""
+    change_from_previous: raw.change_from_previous || "",
+    image_quality: raw.image_quality || "unknown",
+    additional_evidence_needed: raw.additional_evidence_needed || "",
+    higher_impact_considered: Boolean(raw.higher_impact_considered),
+    visible_growth_stage: raw.visible_growth_stage || "",
+    flowering_present: Boolean(raw.flowering_present),
+    fruit_present: Boolean(raw.fruit_present),
+    visible_pest_possible: Boolean(raw.visible_pest_possible)
   };
 }
+
+// --- Garden Guidance Foundation extensions ---
+
+// Image quality levels assessed from the photo.
+export const IMAGE_QUALITY_LEVELS = {
+  good: "good",
+  fair: "fair",
+  poor: "poor",
+  unusable: "unusable",
+  unknown: "unknown"
+};
+
+// Force confidence toward LOW when image quality is insufficient (Part 4).
+export function forceConfidenceFromImageQuality(confidence, imageQuality) {
+  if (imageQuality === IMAGE_QUALITY_LEVELS.unusable || imageQuality === IMAGE_QUALITY_LEVELS.poor) {
+    return CONFIDENCE_LEVELS.low;
+  }
+  return confidence;
+}
+
+// Determine if the analysis found no meaningful abnormality (Part 2 rule).
+// A healthy-looking plant should not receive an invented problem.
+export function hasNoMeaningfulAbnormality(observations) {
+  if (!Array.isArray(observations) || observations.length === 0) return true;
+  return observations.every((o) => !o.severity || o.severity === "none");
+}
+
+// Score a knowledge source against matching criteria (Part 6 structured matching).
+// Used by garden-context.js to rank approved sources by relevance.
+export function scoreKnowledgeSource(source, criteria) {
+  if (!source || !source.approved) return 0;
+  let score = 0;
+  const cropTags = (source.crop_tags || []).map((t) => String(t).toLowerCase());
+  const issueTags = (source.issue_tags || []).map((t) => String(t).toLowerCase());
+  const topicTags = (source.topic_tags || []).map((t) => String(t).toLowerCase());
+  if (criteria.crop && cropTags.includes(String(criteria.crop).toLowerCase())) score += 3;
+  if (Array.isArray(criteria.issues)) {
+    for (const issue of criteria.issues) {
+      if (issue && issueTags.includes(String(issue).toLowerCase())) score += 2;
+    }
+  }
+  if (criteria.topic && topicTags.includes(String(criteria.topic).toLowerCase())) score += 2;
+  if (criteria.region && source.california_region) {
+    if (String(source.california_region).toLowerCase().includes(String(criteria.region).toLowerCase())) score += 1;
+  }
+  if (criteria.season && source.season) {
+    if (String(source.season).toLowerCase() === String(criteria.season).toLowerCase()) score += 1;
+  }
+  return score;
+}
+
+// Human-readable action title templates (Part 8).
+const ACTION_TITLE_TEMPLATES = {
+  check_soil_moisture: (n) => `Check soil moisture around ${n}`,
+  photograph_again: (n) => `Take another photo of ${n}`,
+  inspect_leaves: (n) => `Inspect leaves of ${n}`,
+  observe: (n) => `Keep an eye on ${n}`,
+  adjust_watering_timing: (n) => `Adjust watering timing for ${n}`,
+  temporary_shade: (n) => `Provide temporary shade for ${n}`,
+  improve_airflow: (n) => `Improve airflow around ${n}`,
+  remove_dead_material: (n) => `Remove dead material from ${n}`,
+  pesticide: (n) => `Consider treatment for ${n}`,
+  fungicide: (n) => `Consider fungicide for ${n}`,
+  fertilizer: (n) => `Consider fertilizing ${n}`,
+  major_pruning: (n) => `Prune ${n}`,
+  soil_amendment: (n) => `Amend soil for ${n}`,
+  gather_more_evidence: (n) => `Gather more evidence for ${n}`
+};
+
+export function buildActionTitle(actionKey, plantDisplayName) {
+  const key = String(actionKey || "").toLowerCase().replace(/\s+/g, "_");
+  const name = plantDisplayName || "the plant";
+  const template = ACTION_TITLE_TEMPLATES[key];
+  if (template) return template(name);
+  const titleCased = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return `${titleCased} ${name}`.trim();
+}
+
+// Compute a due date from urgency + optional explicit follow-up date.
+export function dueDateFromUrgency(urgency, followUpDate) {
+  if (followUpDate) return followUpDate;
+  const today = new Date();
+  const days = { urgent: 0, today: 0, follow_up: 3, routine: 7, upcoming: 14 };
+  today.setDate(today.getDate() + (days[urgency] ?? 7));
+  return today.toISOString().slice(0, 10);
+}
+
+// Detect whether a new action duplicates an existing pending action (Part 8).
+export function isDuplicateAction(existingPendingActions, newActionKey, plantId) {
+  const newKey = String(newActionKey || "").toLowerCase().replace(/\s+/g, "_");
+  if (!newKey) return false;
+  return (existingPendingActions || []).some((a) => {
+    if (a.plant_id !== plantId) return false;
+    if (a.status !== "pending") return false;
+    const existingTitle = String(a.title || "").toLowerCase().replace(/\s+/g, "_");
+    return existingTitle.includes(newKey) || newKey.includes(existingTitle);
+  });
+}
+
+// The uncertainty fallback result when AI processing fails (Part 10).
+export const UNCERTAINTY_RESULT = {
+  observation_summary: "Botany Betty couldn't analyze this update right now.",
+  observations: [],
+  possible_explanations: [],
+  recommended_next_action: "observe",
+  action_risk: "low",
+  confidence_level: "low",
+  urgency: "routine",
+  follow_up_date: null,
+  source_references: [],
+  change_from_previous: "",
+  image_quality: "unknown",
+  additional_evidence_needed: "",
+  higher_impact_considered: false,
+  visible_growth_stage: "",
+  flowering_present: false,
+  fruit_present: false,
+  visible_pest_possible: false
+};

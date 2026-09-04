@@ -176,22 +176,41 @@ export default function PlantDetail() {
           <h2 className="font-display text-xl font-bold mb-3">Latest AI Assessment</h2>
           <div className="rounded-2xl border border-border bg-surface p-5">
             <ConfidenceNotice level={analyses[0].confidence_level} className="mb-3" />
-            <p className="text-sm text-foreground/90 leading-relaxed">{analyses[0].observation_summary}</p>
-            {analyses[0].change_from_previous && <p className="text-sm text-muted-foreground mt-2"><span className="font-medium">Change: </span>{analyses[0].change_from_previous}</p>}
+            {(analyses[0].image_quality === "poor" || analyses[0].image_quality === "unusable") && (
+              <p className="text-sm text-status-warning mb-3">This photo was hard to read clearly. A sharper, closer photo would help.</p>
+            )}
+            <p className="text-sm font-medium mb-1">What I noticed</p>
+            <p className="text-sm text-foreground/90 leading-relaxed mb-3">{analyses[0].observation_summary}</p>
             {analyses[0].possible_explanations?.length > 0 && (
-              <div className="mt-3">
-                <p className="text-sm font-medium">Possible explanations:</p>
-                <ul className="list-disc list-inside text-sm text-muted-foreground mt-1 space-y-0.5">
+              <div className="mb-3">
+                <p className="text-sm font-medium mb-1">What it might mean</p>
+                <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5">
                   {analyses[0].possible_explanations.map((e, i) => <li key={i}>{e}</li>)}
                 </ul>
               </div>
             )}
             {analyses[0].recommended_next_action && (
-              <div className="mt-3 rounded-xl bg-primary/10 p-3">
-                <p className="text-sm font-medium text-primary">Recommended next: {analyses[0].recommended_next_action.replace(/_/g, " ")}</p>
+              <div className="rounded-xl bg-primary/10 p-3 mb-3">
+                <p className="text-sm font-medium text-primary mb-0.5">What to do next</p>
+                <p className="text-sm text-primary/90">{analyses[0].recommended_next_action.replace(/_/g, " ")}</p>
               </div>
             )}
-            <p className="text-xs text-muted-foreground mt-3">{formatDateTime(analyses[0].analysis_date)}</p>
+            {analyses[0].additional_evidence_needed && (
+              <div className="rounded-xl bg-muted/50 p-3 mb-3">
+                <p className="text-sm font-medium mb-0.5">To get a clearer answer</p>
+                <p className="text-sm text-muted-foreground">{analyses[0].additional_evidence_needed}</p>
+              </div>
+            )}
+            {analyses[0].source_references?.length > 0 && (
+              <div className="mb-3">
+                <p className="text-sm font-medium mb-1">Why this recommendation?</p>
+                <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5">
+                  {analyses[0].source_references.map((s, i) => <li key={i}>{s}</li>)}
+                </ul>
+              </div>
+            )}
+            {analyses[0].change_from_previous && <p className="text-sm text-muted-foreground mb-2"><span className="font-medium">Change: </span>{analyses[0].change_from_previous}</p>}
+            <p className="text-xs text-muted-foreground">{formatDateTime(analyses[0].analysis_date)}</p>
           </div>
         </section>
       )}
