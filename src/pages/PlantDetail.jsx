@@ -12,6 +12,7 @@ import StatusBadge from "@/components/StatusBadge";
 import ConfidenceNotice from "@/components/ConfidenceNotice";
 import { getStatus, getConfidence, ENTRY_TYPE_CONFIG } from "@/lib/statusConfig";
 import { formatDate, formatDateTime } from "@/lib/garden-data";
+import ReanalysisCard from "@/components/ReanalysisCard";
 
 export default function PlantDetail() {
   const { id } = useParams();
@@ -214,6 +215,15 @@ export default function PlantDetail() {
           </div>
         </section>
       )}
+
+      {/* Controlled re-analysis */}
+      <ReanalysisCard
+        analysis={analyses[0]}
+        plantId={id}
+        plantDisplayName={plant.display_name}
+        journalEntries={journal}
+        onDone={loadAll}
+      />
 
       {/* Next recommended actions */}
       {pendingActions.length > 0 && (

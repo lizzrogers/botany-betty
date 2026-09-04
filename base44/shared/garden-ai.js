@@ -174,13 +174,49 @@ export function buildActionTitle(actionKey, plantDisplayName) {
   return `${titleCased} ${name}`.trim();
 }
 
+// Validate an LLM-provided follow-up date.
+// Returns a clean YYYY-MM-DD string only if the date parses to a valid date,
+// is not in the past, and falls within a reasonable 1–30 day window.
+// Otherwise returns null so the caller falls back to deterministic timing.
+export function validateFollowUpDate(rawDate) {
+  if (!rawDate) return null;
+  const parsed = new Date(rawDate);
+  if (isNaN(parsed.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const parsedDate = new Date(parsed);
+  parsedDate.setHours(0, 0, 0, 0);
+  if (parsedDate < today) return null;
+  const maxDate = new Date();
+  maxDate.setHours(23, 59, 59, 999);
+  maxDate.setDate(maxDate.getDate() + 30);
+  if (parsedDate > maxDate) return null;
+  return parsedDate.toISOString().slice(0, 10);
+}
+
 // Compute a due date from urgency + optional explicit follow-up date.
+// The LLM's follow_up_date is validated first; if it fails validation, the
+// deterministic urgency-based fallback is used instead.
 export function dueDateFromUrgency(urgency, followUpDate) {
-  if (followUpDate) return followUpDate;
+  const validated = validateFollowUpDate(followUpDate);
+  if (validated) return validated;
   const today = new Date();
   const days = { urgent: 0, today: 0, follow_up: 3, routine: 7, upcoming: 14 };
   today.setDate(today.getDate() + (days[urgency] ?? 7));
   return today.toISOString().slice(0, 10);
+}
+
+// Determine whether a prior AI analysis warrants controlled re-analysis.
+// Re-analysis is allowed when the prior result had low confidence, poor or
+// unusable image quality, explicitly requested additional evidence, or
+// appears to be an uncertainty (failure) placeholder.
+export function canReanalyze(analysis) {
+  if (!analysis) return true;
+  if (analysis.confidence_level === CONFIDENCE_LEVELS.low) return true;
+  if (analysis.image_quality === IMAGE_QUALITY_LEVELS.poor || analysis.image_quality === IMAGE_QUALITY_LEVELS.unusable) return true;
+  if (analysis.additional_evidence_needed && String(analysis.additional_evidence_needed).trim()) return true;
+  if (analysis.observation_summary === UNCERTAINTY_RESULT.observation_summary) return true;
+  return false;
 }
 
 // Detect whether a new action duplicates an existing pending action (Part 8).

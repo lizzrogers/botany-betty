@@ -5,6 +5,8 @@ import {
   canShowHigherImpactRecommendation,
   buildActionTitle,
   dueDateFromUrgency,
+  validateFollowUpDate,
+  canReanalyze,
   isDuplicateAction,
   hasNoMeaningfulAbnormality,
   classifyActionRisk,
@@ -36,15 +38,31 @@ export default async function(req) {
     journalEntryId = body?.journal_entry_id || null;
     const plantId = body?.plant_id;
     const photoUrl = body?.photo_url;
+    const forceReanalyze = Boolean(body?.force_reanalyze);
 
     if (!plantId) return Response.json({ error: 'plant_id is required.' }, { status: 400 });
     if (!photoUrl) return Response.json({ error: 'photo_url is required.' }, { status: 400 });
 
-    // Cost control (Part 11): skip if this journal entry was already analyzed.
+    // Cost control (Part 11): skip if this journal entry was already analyzed,
+    // unless a controlled re-analysis is explicitly requested.
     if (journalEntryId) {
       const existing = await base44.entities.AIAnalysis.filter({ journal_entry_id: journalEntryId });
-      if (existing.length > 0) {
+      if (existing.length > 0 && !forceReanalyze) {
         return Response.json({ analysis: existing[0], already_analyzed: true, model_provider: "cached" });
+      }
+      // Controlled re-analysis: only when the prior result warrants it.
+      if (existing.length > 0 && forceReanalyze) {
+        if (!canReanalyze(existing[0])) {
+          return Response.json({ analysis: existing[0], already_analyzed: true, model_provider: "cached", reanalysis_blocked: true });
+        }
+        // Clean up the prior analysis, its observations, and any pending
+        // Garden Actions that originated from it.
+        await base44.entities.AIAnalysis.delete(existing[0].id);
+        await base44.entities.PlantObservation.deleteMany({ journal_entry_id: journalEntryId });
+        const oldActions = await base44.entities.GardenAction.filter({ originating_ai_analysis_id: existing[0].id, status: "pending" });
+        for (const a of oldActions) {
+          await base44.entities.GardenAction.delete(a.id);
+        }
       }
       await base44.entities.JournalEntry.update(journalEntryId, { ai_processing_status: "processing" });
     }
@@ -201,6 +219,11 @@ Return ONLY a JSON object with this exact shape:
       }
     }
 
+    // Validate the LLM-provided follow-up date. The raw value is preserved in
+    // raw_result for debugging; only the validated date is used operationally.
+    const llmFollowUpDateOriginal = normalized.follow_up_date;
+    normalized.follow_up_date = validateFollowUpDate(normalized.follow_up_date);
+
     // Part 7: Store the structured AIAnalysis record.
     const analysisRecord = await base44.entities.AIAnalysis.create({
       journal_entry_id: journalEntryId || undefined,
@@ -218,7 +241,7 @@ Return ONLY a JSON object with this exact shape:
       higher_impact_considered: normalized.higher_impact_considered,
       image_quality: normalized.image_quality,
       knowledge_source_ids: knowledgeSourceIds,
-      raw_result: normalized,
+      raw_result: { ...normalized, llm_follow_up_date_original: llmFollowUpDateOriginal },
       model_provider: "base44-llm"
     });
 
