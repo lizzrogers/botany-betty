@@ -81,7 +81,7 @@ export default function Onboarding() {
                 Your personalized California garden coach. We'll help you know what needs attention today, what to do next, and how your garden is doing over time.
               </p>
               <p className="mt-4 text-sm text-muted-foreground">Let's set up your garden — it only takes a minute.</p>
-              <Button onClick={() => setStep(1)} size="lg" className="tap-target w-full mt-8 text-base">
+              <Button onClick={() => setStep(1)} size="lg" className="tap-target w-full mt-8 text-base bg-blue-600 text-white hover:bg-blue-700">
                 Get started <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </div>
