@@ -166,6 +166,9 @@ export default function Today() {
           <Button onClick={() => navigate("/this-week")} variant="outline" className="tap-target w-full mt-4">
             View weekly plan <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
+          <Button onClick={() => navigate("/weekly-summary")} variant="ghost" className="tap-target w-full mt-1">
+            Plant performance this week <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
         </div>
       </section>
     </div>

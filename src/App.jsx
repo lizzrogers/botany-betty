@@ -21,6 +21,7 @@ import AddUpdate from '@/pages/AddUpdate';
 import Journal from '@/pages/Journal';
 import ThisWeek from '@/pages/ThisWeek';
 import Settings from '@/pages/Settings';
+import WeeklySummary from '@/pages/WeeklySummary';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
             <Route path="/add-update" element={<AddUpdate />} />
             <Route path="/journal" element={<Journal />} />
             <Route path="/this-week" element={<ThisWeek />} />
+            <Route path="/weekly-summary" element={<WeeklySummary />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
         </Route>

@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Outlet } from "react-router-dom";
-import { Sun, Trees, Plus, NotebookPen, CalendarDays, Settings, User, LogOut } from "lucide-react";
+import { Sun, Trees, Plus, NotebookPen, CalendarDays, TrendingUp, Settings, User, LogOut } from "lucide-react";
 import { useGarden } from "@/lib/garden-context";
 import { base44 } from "@/api/base44Client";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -110,6 +110,18 @@ function DesktopRail() {
         >
           <CalendarDays className="h-5 w-5" />
           This Week
+        </NavLink>
+        <NavLink
+          to="/weekly-summary"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors tap-target",
+              isActive ? "bg-primary/10 text-primary" : "text-foreground/70 hover:bg-muted hover:text-foreground"
+            )
+          }
+        >
+          <TrendingUp className="h-5 w-5" />
+          Weekly Summary
         </NavLink>
       </nav>
       <div className="p-4 border-t border-border">
